@@ -148,3 +148,4 @@ ENV/
 ########## CUSTOM ###########
 
 .ycm_extra_conf.py
+*.eep
