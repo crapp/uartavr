@@ -52,6 +52,13 @@
 #include <avr/io.h>
 #include <util/setbaud.h>
 
+/** @file */
+
+/*
+ * Define the line ending you need. This one will work with minicom on linux
+ */
+#define CR "\n\r"
+
 struct uart_cfg {
     uint8_t tx;
     uint8_t tx_int;
@@ -78,5 +85,7 @@ void put_UART(unsigned char c);
  * @param s The string you want to send
  */
 void puts_UART(const char *s);
+
+/** @} */
 
 #endif /* ifndef UART_H */

@@ -76,4 +76,9 @@ void puts_UART(const char *s)
         put_UART(*s);
         s++;
     }
+    char *cr_ptr = CR;
+    while (*cr_ptr) {
+        put_UART(*cr_ptr);
+        cr_ptr++;
+    }
 }
