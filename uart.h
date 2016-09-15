@@ -60,7 +60,6 @@ struct uart_cfg {
 };
 
 void init_uart_cfg(struct uart_cfg *cfg);
-void bla(struct uart_cfg *cfg);
 
 /**
  * @brief
