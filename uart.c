@@ -31,6 +31,16 @@
 
 #include "uart.h"
 
+void init_uart_cfg(struct uart_cfg *cfg)
+{
+    if (cfg) {
+        cfg->tx = _BV(TXEN0);
+        cfg->tx_int = _BV(TXCIE0);
+        cfg->rx = _BV(RXEN0);
+        cfg->rx_int = _BV(RXCIE0);
+    }
+};
+
 void init_UART(const struct uart_cfg *cfg)
 {
     UBRR0H = UBRRH_VALUE;  // set baud rate

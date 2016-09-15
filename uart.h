@@ -29,6 +29,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef UART_H
+#define UART_H
+
 /*
  * Make sure we have defined F_CPU before we include anything. This is very
  * important and you must change this value according to your needs. The easiest
@@ -56,13 +59,8 @@ struct uart_cfg {
     uint8_t rx_int;
 };
 
-void init_uart_cfg(struct uart_cfg *cfg)
-{
-    cfg->tx = _BV(TXEN0);
-    cfg->tx_int = _BV(TXCIE0);
-    cfg->rx = _BV(RXEN0);
-    cfg->rx_int = _BV(RXCIE0);
-};
+void init_uart_cfg(struct uart_cfg *cfg);
+void bla(struct uart_cfg *cfg);
 
 /**
  * @brief
@@ -81,3 +79,5 @@ void put_UART(unsigned char c);
  * @param s The string you want to send
  */
 void puts_UART(const char *s);
+
+#endif /* ifndef UART_H */
