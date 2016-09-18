@@ -44,40 +44,121 @@
 #ifndef BAUD
 #define BAUD 9600L
 #endif /* ifndef BAUD */
+
 /*
  * Some basic includes
  */
 #include <inttypes.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <avr/io.h>
+#include <util/atomic.h>
 #include <util/setbaud.h>
 
 /** @file */
 
-/*
- * Define the line ending you need. This one will work with minicom on linux
+#define UARTAVR_VERSION_MAJOR 0
+#define UARTAVR_VERSION_MINOR 1
+#define UARTAVR_VERSION_PATCH 0
+
+/**
+ * @brief Define the line ending you need. This one will work with minicom on linux
  */
 #define CR "\n\r"
 
-struct uart_cfg {
-    uint8_t tx;
-    uint8_t tx_int;
-    uint8_t rx;
-    uint8_t rx_int;
+/**
+ * @brief The buffer size for the RX and TX buffers
+ */
+#define BUFFSIZE 128
+
+#define LIB_DEBUG
+
+//http://stackoverflow.com/a/14047028/1127601
+
+/**
+ * @brief Presenting a circular buffer
+ */
+struct DirBuff {
+    char buff[BUFFSIZE];
+    char *start_ptr;
+    char *end_ptr;
+    char *inpos_ptr;
+    char *outpos_ptr;
+    uint16_t items;
+    uint8_t full;
+    void (*callback)(void);
 };
 
-void init_uart_cfg(struct uart_cfg *cfg);
+/**
+ * @brief Identifier for direction buffer
+ */
+enum DIR_BUFFS { RX_BUFF, TX_BUFF };
+
+/**
+ * @brief This holds the circular buffers
+ */
+struct CBuffer {
+    struct DirBuff rx_buff; /**< RX Buffer */
+    struct DirBuff tx_buff; /**< TX Buffer */
+} cb;
+
+/**
+ * @brief A struct to configure the UART
+ *
+ * @sa init_uart_cfg
+ */
+struct UARTcfg {
+    uint8_t tx; /**< Activate TX, use the appropriate Byte for your platform */
+    uint8_t rx; /**< Activate RX, use the appropriate Byte for your platform */
+    void (*rx_callback)(
+        void); /**< Callback function that will be called from RX ISR */
+    void (*tx_callback)(
+        void); /**< Callback function that will be called from TX ISR */
+};
+
+/**
+ * @brief Initializes the circular buffer structure.
+ *
+ * @warning Do not call this function yourself. The init_UART() function takes
+ * care of this.
+ */
+void cb_init(void);
+
+void get_direction_buffer(enum DIR_BUFFS dir, struct DirBuff **dbuff);
+
+uint8_t cb_pop(char *c, enum DIR_BUFFS dir);
+uint8_t cp_push(char c, enum DIR_BUFFS dir);
+
+/**
+ * @brief Init a cfg struct with the default values
+ *
+ * @param cfg
+ */
+void init_uart_cfg(struct UARTcfg *cfg);
 
 /**
  * @brief
+ *
+ * @detail
+ * This method also initializes a circular buffer. The buffer is used by this
+ * UART implementation to store data that will either be send or was received.
+ * This way we can use UART interrupts and the write functions are not blocking.
+ * The read functions don't have to poll the UART RX register for changes.
  */
-void init_UART(const struct uart_cfg *cfg);
+void init_UART(const struct UARTcfg *cfg);
+
+#ifdef LIB_DEBUG
+void put_noi_UART(const char c);
+void puts_noi_UART(const char *s);
+#endif /* LIB_DEBUG */
+
 /**
  * @brief Send a single character via UART
  *
  * @param c The character to send
  */
-void put_UART(unsigned char c);
+void put_UART(const unsigned char c);
 
 /**
  * @brief Write a string to the UART buffer
@@ -85,6 +166,22 @@ void put_UART(unsigned char c);
  * @param s The string you want to send
  */
 void puts_UART(const char *s);
+
+/**
+ * @brief Retrieve one char from the buffer
+ *
+ * @param s Pointer to a char variable
+ *
+ * @return 0 if character was retrieved, 1 otherwise
+ */
+uint8_t get_UART(char *s);
+/**
+ * @brief Get all data from the circular buffer
+ *
+ * @param s Pointer an array which this function uses to store the data from cb
+ * @return 0 on success or 1 if something went wrong
+ */
+uint8_t gets_UART(char *s);
 
 /** @} */
 

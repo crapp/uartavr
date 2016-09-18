@@ -83,7 +83,7 @@ LDFLAGS = $(EXTMEMOPTS) $(LDMAP) $(PRINTF_LIB_FLOAT) $(SCANF_LIB_FLOAT) $(MATH_L
 # Programming support using avrdude. Settings and variables.
 
 AVRDUDE_PROGRAMMER = stk500v2
-AVRDUDE_PORT = /dev/ttyUSB1
+AVRDUDE_PORT = /dev/ttyUSB0
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 #AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
@@ -206,7 +206,7 @@ $(TARGET).elf: $(OBJ)
 # Target: clean project.
 clean:
 	$(REMOVE) $(TARGET).hex $(TARGET).eep $(TARGET).cof $(TARGET).elf \
-	$(TARGET).map $(TARGET).sym $(TARGET).lss $(TARGET).o $(TARGET) \
+	$(TARGET).map $(TARGET).sym $(TARGET).lss $(TARGET).o \
 	$(SRC:.c=.s) $(SRC:.c=.d)
 
 depend:

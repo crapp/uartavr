@@ -31,7 +31,98 @@
 
 #include "uart.h"
 
-void init_uart_cfg(struct uart_cfg *cfg)
+void cb_init(void)
+{
+    struct DirBuff *dbuffs[] = {&(cb.rx_buff), &(cb.tx_buff)};
+    for (uint8_t i = 0; i < 2; i++) {
+        dbuffs[i]->start_ptr = &dbuffs[i]->buff[0];
+        dbuffs[i]->end_ptr = &dbuffs[i]->buff[BUFFSIZE];
+        dbuffs[i]->inpos_ptr = &dbuffs[i]->buff[0];
+        dbuffs[i]->outpos_ptr = &dbuffs[i]->buff[0];
+        dbuffs[i]->items = 0;
+        dbuffs[i]->full = 0;
+        dbuffs[i]->callback = NULL;
+    }
+}
+
+void get_direction_buffer(enum DIR_BUFFS dir, struct DirBuff **dbuff)
+{
+    switch (dir) {
+    case RX_BUFF:
+        *dbuff = &(cb.rx_buff);
+        break;
+    case TX_BUFF:
+        *dbuff = &(cb.tx_buff);
+    default:
+        break;
+    }
+}
+
+uint8_t cb_pop(char *c, enum DIR_BUFFS dir)
+{
+    struct DirBuff *dbuff = NULL;
+
+    get_direction_buffer(dir, &dbuff);
+
+    if (!dbuff)
+        return 2;
+
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        if (dbuff->inpos_ptr == dbuff->outpos_ptr && dbuff->full != 1) {
+            return 1;
+        }
+    }
+
+    *c = *(dbuff->outpos_ptr++);
+
+    if (dbuff->outpos_ptr == dbuff->end_ptr)
+        dbuff->outpos_ptr = dbuff->start_ptr;
+
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        dbuff->items--;
+
+        if (dbuff->full)
+            dbuff->full = 0;
+    }
+
+    return 0;
+}
+
+uint8_t cb_push(char c, enum DIR_BUFFS dir)
+{
+    struct DirBuff *dbuff = NULL;
+
+    get_direction_buffer(dir, &dbuff);
+
+    if (!dbuff)
+        return 2;
+
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        if (dbuff->inpos_ptr == dbuff->outpos_ptr && dbuff->full == 1) {
+            return 1;
+        }
+    }
+
+    *(dbuff->inpos_ptr++) = c;
+
+    if (dbuff->inpos_ptr == dbuff->end_ptr)
+        dbuff->inpos_ptr = dbuff->start_ptr;
+
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        dbuff->items++;
+
+        if (dbuff->inpos_ptr == dbuff->outpos_ptr)
+            dbuff->full = 1;
+    }
+
+    return 0;
+}
+
+void init_uart_cfg(struct UARTcfg *cfg)
 {
     if (cfg) {
         cfg->tx = _BV(TXEN0);
@@ -41,8 +132,10 @@ void init_uart_cfg(struct uart_cfg *cfg)
     }
 };
 
-void init_UART(const struct uart_cfg *cfg)
+void init_UART(const struct UARTcfg *cfg)
 {
+    cb_init();
+
     UBRR0H = UBRRH_VALUE;  // set baud rate
     UBRR0L = UBRRL_VALUE;
 
@@ -58,16 +151,38 @@ void init_UART(const struct uart_cfg *cfg)
     UCSR0C = _BV(UCSZ01) | _BV(UCSZ00);
     /* as we did not touch UPMn0 UPMn1 and USBSn we are now using 8N1 */
     /* activate send and receive */
-    UCSR0B |= cfg->tx | cfg->rx;
+    UCSR0B |= cfg->tx | cfg->rx | _BV(RXCIE0);
 }
 
-void put_UART(unsigned char c)
+#ifdef LIB_DEBUG
+
+void put_noi_UART(const char c)
 {
-    /*Stay here until data buffer is empty*/
+    /* Stay here until data buffer is empty */
     while (!(UCSR0A & _BV(UDRE0)))
         ;
     /* write data */
     UDR0 = c;
+}
+void puts_noi_UART(const char *s)
+{
+    while (*s) {
+        put_noi_UART(*s);
+        s++;
+    }
+    char *cr_ptr = CR;
+    while (*cr_ptr) {
+        put_noi_UART(*cr_ptr);
+        cr_ptr++;
+    }
+}
+
+#endif /* LIB_DEBUG */
+
+void put_UART(const unsigned char c)
+{
+    if (cb_push(c, TX_BUFF) == 0)
+        UCSR0B |= _BV(UDRIE0); /* activate buffer empty interrupt */
 }
 
 void puts_UART(const char *s)
@@ -80,5 +195,45 @@ void puts_UART(const char *s)
     while (*cr_ptr) {
         put_UART(*cr_ptr);
         cr_ptr++;
+    }
+}
+
+uint8_t get_UART(char *s)
+{
+    char *s_ptr = s;
+    if (cb_pop(s_ptr, RX_BUFF) == 0)
+        return 0;
+    return 1;
+}
+
+uint8_t gets_UART(char *s)
+{
+    char *s_ptr = s;
+    if (cb.rx_buff.items > 0) {
+        while ((cb_pop(s_ptr, RX_BUFF) == 0)) {
+            s_ptr++;
+        }
+        s_ptr++;
+        *s_ptr = '\0';
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+ISR(USART_RX_vect)
+{
+    cb_push(UDR0, RX_BUFF);
+    if (cb.rx_buff.callback)
+        cb.rx_buff.callback();
+}
+
+ISR(USART_UDRE_vect)
+{
+    char c = 0;
+    if (cb_pop(&c, TX_BUFF) != 0) {
+        UCSR0B &= ~(_BV(UDRIE0));
+    } else {
+        UDR0 = c;
     }
 }

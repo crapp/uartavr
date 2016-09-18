@@ -37,17 +37,34 @@
 
 #include "uart.h"
 
+void rx_cb(void)
+{
+    char s[12];
+    if (cb.rx_buff.items == 11) {
+        gets_UART(&s[0]);
+        puts_UART(&s[0]);
+    }
+}
 int main(void)
 {
-    struct uart_cfg cfg;
-    memset(&cfg, 0, sizeof(struct uart_cfg));
+    struct UARTcfg cfg;
+    memset(&cfg, 0, sizeof(struct UARTcfg));
 
     init_uart_cfg(&cfg);
     init_UART(&cfg);
+    cb.rx_buff.callback = rx_cb;
+
+    sei();
 
     while (1) {
-        puts_UART("This your trusty microc");
-        _delay_ms(1000);
+        /*
+         *static uint8_t cnt = 0;
+         *char s[64];
+         *sprintf(&s[0], "This is your trusty micro %u", cnt);
+         *puts_UART(s);
+         *cnt++;
+         *_delay_ms(100);
+         */
     };
 
     return 0;

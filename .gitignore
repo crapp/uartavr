@@ -149,3 +149,5 @@ ENV/
 
 .ycm_extra_conf.py
 *.eep
+
+doc/html
