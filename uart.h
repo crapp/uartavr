@@ -71,6 +71,9 @@
  * or was received. In general the user does not have to interact directly with
  * this buffer as there are some convenience methods already available.
  *
+ * In order to use this implementation you have to use [sei](http://www.nongnu.org/avr-libc/user-manual/group__avr__interrupts.html#gaad5ebd34cb344c26ac87594f79b06b73)
+ * which enables interrupts by setting the global interrupt mask.
+ *
  */
 
 /**
@@ -98,6 +101,11 @@
 
 /**
  * @brief Presenting a circular buffer
+ *
+ * @details
+ * The buffer is used by this UART implementation to store data that will either
+ * be send or was received. This way we can use UART interrupts and the write or
+ * read functions are not blocking.
  */
 struct DirBuff {
     char buff[BUFFSIZE];       /**< The buffer holding the data that should be
@@ -159,9 +167,31 @@ struct UARTcfg {
  */
 void cb_init(void);
 
+/**
+ * @brief Get a direction buffer struct from CBuffer
+ *
+ * @param dir RX or TX
+ * @param dbuff ** to a DirBuff struct
+ */
 void get_direction_buffer(enum DIR_BUFFS dir, struct DirBuff **dbuff);
 
+/**
+ * @brief Get one byte from the circular buffer
+ *
+ * @param c Pointer to char variable
+ * @param dir Get the byte from the TX or RX buffer
+ *
+ * @return 0 If the byte has been retrieved, 1 if the buffer is empty
+ */
 uint8_t cb_pop(char *c, enum DIR_BUFFS dir);
+/**
+ * @brief Put one byte in the circular buffer
+ *
+ * @param c A char variable
+ * @param dir Put the byte on the TX or RX buffer
+ *
+ * @return 0 If the byte has written successfully, 1 if the buffer is full
+ */
 uint8_t cp_push(char c, enum DIR_BUFFS dir);
 
 /**
@@ -183,10 +213,6 @@ void init_uart_cfg(struct UARTcfg *cfg);
  * This method also initializes a circular buffer. So there is no need to call
  * cb_init() yourself.
  *
- * The buffer is used by this
- * UART implementation to store data that will either be send or was received.
- * This way we can use UART interrupts and the write functions are not blocking.
- * The read functions don't have to poll the UART RX register for changes.
  */
 void init_UART(const struct UARTcfg *cfg);
 
