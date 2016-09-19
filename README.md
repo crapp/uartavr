@@ -13,7 +13,7 @@ Add the header and source file to your project.
 
 ### API Documentation
 
-Have a look at the API documentation hosted by github
+Have a look at the [API documentation](https://crapp.github.io/uartavr/) hosted by github
 
 ### Example
 
