@@ -149,5 +149,6 @@ ENV/
 
 .ycm_extra_conf.py
 *.eep
+.lvimrc
 
 doc/html
