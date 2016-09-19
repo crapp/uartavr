@@ -67,10 +67,10 @@ uint8_t cb_pop(char *c, enum DIR_BUFFS dir)
     if (!dbuff)
         return 2;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
     {
         if (dbuff->inpos_ptr == dbuff->outpos_ptr && dbuff->full != 1) {
             return 1;
@@ -82,10 +82,10 @@ uint8_t cb_pop(char *c, enum DIR_BUFFS dir)
     if (dbuff->outpos_ptr == dbuff->end_ptr)
         dbuff->outpos_ptr = dbuff->start_ptr;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
     {
         dbuff->items--;
 
@@ -105,10 +105,10 @@ uint8_t cb_push(char c, enum DIR_BUFFS dir)
     if (!dbuff)
         return 2;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
     {
         if (dbuff->inpos_ptr == dbuff->outpos_ptr && dbuff->full == 1) {
             return 1;
@@ -120,10 +120,10 @@ uint8_t cb_push(char c, enum DIR_BUFFS dir)
     if (dbuff->inpos_ptr == dbuff->end_ptr)
         dbuff->inpos_ptr = dbuff->start_ptr;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
     {
         dbuff->items++;
 
