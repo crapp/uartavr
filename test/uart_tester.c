@@ -30,6 +30,7 @@
  */
 
 #include <avr/io.h>
+#include <avr/sleep.h>
 
 #include <util/delay.h>
 
@@ -37,14 +38,21 @@
 
 #include "uart.h"
 
+/*
+ * You can use this example to echo back data that was send to the
+ * microcontroller.
+ * This example makes use of the idle sleep mode
+ */
+
+volatile uint8_t wakeup;
+
 void rx_cb(void)
 {
-    char s[12];
-    if (cb.rx_buff.items == 11) {
-        gets_UART(&s[0]);
-        puts_UART(&s[0]);
+    if (cb.rx_buff.items == 5) {
+        wakeup = 1;
     }
 }
+
 int main(void)
 {
     struct UARTcfg cfg;
@@ -52,19 +60,23 @@ int main(void)
 
     init_uart_cfg(&cfg);
     init_UART(&cfg);
-    cb.rx_buff.callback = rx_cb;
+    cb.rx_buff.rx_callback = rx_cb;
+
+    wakeup = 0;
+
+    set_sleep_mode(SLEEP_MODE_IDLE);
+    sleep_enable();
 
     sei();
-
     while (1) {
-        /*
-         *static uint8_t cnt = 0;
-         *char s[64];
-         *sprintf(&s[0], "This is your trusty micro %u", cnt);
-         *puts_UART(s);
-         *cnt++;
-         *_delay_ms(100);
-         */
+        while (!wakeup) {
+            sleep_mode();
+        }
+        char s[6];
+        /* echo the string back */
+        gets_UART(&s[0]);
+        puts_UART(&s[0]);
+        wakeup = 0;
     };
 
     return 0;
