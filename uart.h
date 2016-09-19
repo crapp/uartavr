@@ -49,17 +49,32 @@
  * Some basic includes
  */
 #include <inttypes.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include <avr/io.h>
 #include <util/atomic.h>
 #include <util/setbaud.h>
 
-/** @file */
+/**
+ * @file uart.h
+ *
+ * @author Christian Rapp
+ * @date 2016
+ * @copyright BSD-3-Clause
+ * @pre This library was written and tested fo the Atmege328P microcontroller. You
+ * may need to change the registers if you want to port this to a different AVR.
+ *
+ * @details
+ *
+ * uartavr is a simple interrupt driven UART implementation for Atmel AVRs. This
+ * library uses a circular buffer data structure to store data that should be send
+ * or was received. In general the user does not have to interact directly with
+ * this buffer as there are some convenience methods already available.
+ *
+ */
 
 #define UARTAVR_VERSION_MAJOR 0
-#define UARTAVR_VERSION_MINOR 1
+#define UARTAVR_VERSION_MINOR 2
 #define UARTAVR_VERSION_PATCH 0
 
 /**
@@ -72,28 +87,30 @@
  */
 #define BUFFSIZE 128
 
-#define LIB_DEBUG
-
-//http://stackoverflow.com/a/14047028/1127601
-
 /**
  * @brief Presenting a circular buffer
  */
 struct DirBuff {
-    char buff[BUFFSIZE];
-    char *start_ptr;
-    char *end_ptr;
-    char *inpos_ptr;
-    char *outpos_ptr;
-    uint16_t items;
-    uint8_t full;
-    void (*callback)(void);
+    char buff
+        [BUFFSIZE]; /**< The buffer holding the data that should be send or was received */
+    char *start_ptr;        /**< A pointer to the start of the buffer */
+    char *end_ptr;          /**< A pointer to theend of the buffer */
+    char *inpos_ptr;        /**< The write pointer position */
+    char *outpos_ptr;       /**< The read pointer position */
+    size_t items;           /**< Number of items in the buffer */
+    uint8_t full;           /**< Indicates if the buffer is full, meaning BUFFSIZE
+                              number of items are stored */
+    void (*callback)(void); /**< A callback function you can use to get notified
+                              if something was received or successfully written */
 };
 
 /**
  * @brief Identifier for direction buffer
  */
-enum DIR_BUFFS { RX_BUFF, TX_BUFF };
+enum DIR_BUFFS {
+    RX_BUFF, /**< RX Buffer identifier */
+    TX_BUFF  /**< TX Buffer identifier */
+};
 
 /**
  * @brief This holds the circular buffers
@@ -101,7 +118,11 @@ enum DIR_BUFFS { RX_BUFF, TX_BUFF };
 struct CBuffer {
     struct DirBuff rx_buff; /**< RX Buffer */
     struct DirBuff tx_buff; /**< TX Buffer */
-} cb;
+} cb;                       /**< Global instance of the circular buffer */
+
+/* TODO: I am not sure if this instance of CBuffer needs to be volatile. But if I
+*  do this I get lots of compiler warnings.
+*/
 
 /**
  * @brief A struct to configure the UART
@@ -138,10 +159,18 @@ uint8_t cp_push(char c, enum DIR_BUFFS dir);
 void init_uart_cfg(struct UARTcfg *cfg);
 
 /**
- * @brief
+ * @brief Initialize the UART on the microcontroller
  *
- * @detail
- * This method also initializes a circular buffer. The buffer is used by this
+ * @param cfg Pointer to a UARTcfg struct with the configuration for the UART
+ *
+ * @details
+ * Some configuration options are currently fixed. The UART will always be setup
+ * in 8N1 mode. This may be changed in the future.
+ *
+ * This method also initializes a circular buffer. So there is no need to call
+ * cb_init() yourself.
+ *
+ * The buffer is used by this
  * UART implementation to store data that will either be send or was received.
  * This way we can use UART interrupts and the write functions are not blocking.
  * The read functions don't have to poll the UART RX register for changes.
@@ -149,21 +178,25 @@ void init_uart_cfg(struct UARTcfg *cfg);
 void init_UART(const struct UARTcfg *cfg);
 
 #ifdef LIB_DEBUG
-void put_noi_UART(const char c);
+void put_noi_UART(char c);
 void puts_noi_UART(const char *s);
 #endif /* LIB_DEBUG */
 
 /**
- * @brief Send a single character via UART
+ * @brief Send a single character
  *
  * @param c The character to send
  */
-void put_UART(const unsigned char c);
+void put_UART(const char c);
 
 /**
  * @brief Write a string to the UART buffer
  *
  * @param s The string you want to send
+ * @details
+ *
+ * The macro CR will automatically appended to your string so you do not have to
+ * worry about this.
  */
 void puts_UART(const char *s);
 
@@ -172,7 +205,7 @@ void puts_UART(const char *s);
  *
  * @param s Pointer to a char variable
  *
- * @return 0 if character was retrieved, 1 otherwise
+ * @return 0 If character was retrieved, 1 otherwise
  */
 uint8_t get_UART(char *s);
 /**
@@ -180,9 +213,12 @@ uint8_t get_UART(char *s);
  *
  * @param s Pointer an array which this function uses to store the data from cb
  * @return 0 on success or 1 if something went wrong
+ *
+ * @warning
+ * Make sure your char array has enough room for the data in the circular buffer
+ * plus `\0` as termination character. You can get the numbers of items in the
+ * buffer with DirBuff#items
  */
 uint8_t gets_UART(char *s);
-
-/** @} */
 
 #endif /* ifndef UART_H */

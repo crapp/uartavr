@@ -67,7 +67,10 @@ uint8_t cb_pop(char *c, enum DIR_BUFFS dir)
     if (!dbuff)
         return 2;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable"
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+#pragma clang diagnostic pop
     {
         if (dbuff->inpos_ptr == dbuff->outpos_ptr && dbuff->full != 1) {
             return 1;
@@ -79,7 +82,10 @@ uint8_t cb_pop(char *c, enum DIR_BUFFS dir)
     if (dbuff->outpos_ptr == dbuff->end_ptr)
         dbuff->outpos_ptr = dbuff->start_ptr;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable"
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+#pragma clang diagnostic pop
     {
         dbuff->items--;
 
@@ -99,7 +105,10 @@ uint8_t cb_push(char c, enum DIR_BUFFS dir)
     if (!dbuff)
         return 2;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable"
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+#pragma clang diagnostic pop
     {
         if (dbuff->inpos_ptr == dbuff->outpos_ptr && dbuff->full == 1) {
             return 1;
@@ -111,7 +120,10 @@ uint8_t cb_push(char c, enum DIR_BUFFS dir)
     if (dbuff->inpos_ptr == dbuff->end_ptr)
         dbuff->inpos_ptr = dbuff->start_ptr;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable"
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+#pragma clang diagnostic pop
     {
         dbuff->items++;
 
@@ -124,11 +136,12 @@ uint8_t cb_push(char c, enum DIR_BUFFS dir)
 
 void init_uart_cfg(struct UARTcfg *cfg)
 {
+    /* init config with default values */
     if (cfg) {
         cfg->tx = _BV(TXEN0);
-        cfg->tx_int = _BV(TXCIE0);
         cfg->rx = _BV(RXEN0);
-        cfg->rx_int = _BV(RXCIE0);
+        cfg->tx_callback = NULL;
+        cfg->rx_callback = NULL;
     }
 };
 
@@ -136,7 +149,7 @@ void init_UART(const struct UARTcfg *cfg)
 {
     cb_init();
 
-    UBRR0H = UBRRH_VALUE;  // set baud rate
+    UBRR0H = UBRRH_VALUE; /* set baud rate */
     UBRR0L = UBRRL_VALUE;
 
 #if USE_2X
@@ -150,13 +163,13 @@ void init_UART(const struct UARTcfg *cfg)
     /* 8-bit */
     UCSR0C = _BV(UCSZ01) | _BV(UCSZ00);
     /* as we did not touch UPMn0 UPMn1 and USBSn we are now using 8N1 */
-    /* activate send and receive */
+    /* activate send, receive plus receive interrupt */
     UCSR0B |= cfg->tx | cfg->rx | _BV(RXCIE0);
 }
 
 #ifdef LIB_DEBUG
 
-void put_noi_UART(const char c)
+void put_noi_UART(char c)
 {
     /* Stay here until data buffer is empty */
     while (!(UCSR0A & _BV(UDRE0)))
@@ -179,7 +192,7 @@ void puts_noi_UART(const char *s)
 
 #endif /* LIB_DEBUG */
 
-void put_UART(const unsigned char c)
+void put_UART(const char c)
 {
     if (cb_push(c, TX_BUFF) == 0)
         UCSR0B |= _BV(UDRIE0); /* activate buffer empty interrupt */
