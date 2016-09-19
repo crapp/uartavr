@@ -226,10 +226,10 @@ uint8_t gets_UART(char *s)
         while ((cb_pop(s_ptr, RX_BUFF) == 0)) {
             s_ptr++;
         }
-        s_ptr++;
         *s_ptr = '\0';
         return 0;
     } else {
+        *s_ptr = '\0';
         return 1;
     }
 }

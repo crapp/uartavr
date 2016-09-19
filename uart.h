@@ -85,7 +85,7 @@
 /**
  * @brief The buffer size for the RX and TX buffers
  */
-#define BUFFSIZE 128
+#define BUFFSIZE 64
 
 /**
  * @brief Presenting a circular buffer
