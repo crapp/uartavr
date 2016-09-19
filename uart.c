@@ -41,7 +41,9 @@ void cb_init(void)
         dbuffs[i]->outpos_ptr = &dbuffs[i]->buff[0];
         dbuffs[i]->items = 0;
         dbuffs[i]->full = 0;
-        dbuffs[i]->callback = NULL;
+        dbuffs[i]->rx_callback = NULL;
+        dbuffs[i]->tx_callback = NULL;
+        dbuffs[i]->buff_empty = NULL;
     }
 }
 
@@ -142,6 +144,7 @@ void init_uart_cfg(struct UARTcfg *cfg)
         cfg->rx = _BV(RXEN0);
         cfg->tx_callback = NULL;
         cfg->rx_callback = NULL;
+        cfg->buff_empty = NULL;
     }
 };
 
@@ -237,8 +240,14 @@ uint8_t gets_UART(char *s)
 ISR(USART_RX_vect)
 {
     cb_push(UDR0, RX_BUFF);
-    if (cb.rx_buff.callback)
-        cb.rx_buff.callback();
+    if (cb.rx_buff.rx_callback)
+        cb.rx_buff.rx_callback();
+}
+
+ISR(USART_TX_vect)
+{
+    if (cb.tx_buff.tx_callback)
+        cb.tx_buff.tx_callback();
 }
 
 ISR(USART_UDRE_vect)
@@ -246,6 +255,8 @@ ISR(USART_UDRE_vect)
     char c = 0;
     if (cb_pop(&c, TX_BUFF) != 0) {
         UCSR0B &= ~(_BV(UDRIE0));
+        if (cb.tx_buff.buff_empty)
+            cb.tx_buff.buff_empty();
     } else {
         UDR0 = c;
     }

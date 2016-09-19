@@ -73,8 +73,17 @@
  *
  */
 
+/**
+ * @brief Version major
+ */
 #define UARTAVR_VERSION_MAJOR 0
+/**
+ * @brief Version minor
+ */
 #define UARTAVR_VERSION_MINOR 2
+/**
+ * @brief Version patch
+ */
 #define UARTAVR_VERSION_PATCH 0
 
 /**
@@ -91,17 +100,19 @@
  * @brief Presenting a circular buffer
  */
 struct DirBuff {
-    char buff
-        [BUFFSIZE]; /**< The buffer holding the data that should be send or was received */
-    char *start_ptr;        /**< A pointer to the start of the buffer */
-    char *end_ptr;          /**< A pointer to theend of the buffer */
-    char *inpos_ptr;        /**< The write pointer position */
-    char *outpos_ptr;       /**< The read pointer position */
-    size_t items;           /**< Number of items in the buffer */
-    uint8_t full;           /**< Indicates if the buffer is full, meaning BUFFSIZE
-                              number of items are stored */
-    void (*callback)(void); /**< A callback function you can use to get notified
-                              if something was received or successfully written */
+    char buff[BUFFSIZE];       /**< The buffer holding the data that should be
+                                 send or was received */
+    char *start_ptr;           /**< A pointer to the start of the buffer */
+    char *end_ptr;             /**< A pointer to theend of the buffer */
+    char *inpos_ptr;           /**< The write pointer position */
+    char *outpos_ptr;          /**< The read pointer position */
+    size_t items;              /**< Number of items in the buffer */
+    uint8_t full;              /**< Indicates if the buffer is full, meaning BUFFSIZE
+                                 number of items are stored */
+    void (*rx_callback)(void); /**< A callback function you can use to get
+                                 notified if a byte was received */
+    void (*tx_callback)(void); /**< Callback when a byte was sent */
+    void (*buff_empty)(void);  /**< Callback when buff is empty */
 };
 
 /**
@@ -132,10 +143,12 @@ struct CBuffer {
 struct UARTcfg {
     uint8_t tx; /**< Activate TX, use the appropriate Byte for your platform */
     uint8_t rx; /**< Activate RX, use the appropriate Byte for your platform */
-    void (*rx_callback)(
-        void); /**< Callback function that will be called from RX ISR */
-    void (*tx_callback)(
-        void); /**< Callback function that will be called from TX ISR */
+    void (*rx_callback)(void); /**< Callback function that will be called from
+                                 RX ISR */
+    void (*tx_callback)(void); /**< Callback function that will be called from
+                                 TX ISR */
+    void (*buff_empty)(void);  /**< Callback function that will be called from
+                                 RX ISR */
 };
 
 /**
