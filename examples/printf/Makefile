@@ -7,9 +7,9 @@
 
 MCU = atmega328p
 FORMAT = ihex
-TARGET = uart_tester
+TARGET = printf_example.c
 SRC = $(TARGET).c
-ASRC = ../uart.c
+ASRC = ../../uart.c
 OPT = s
 
 # Name of this Makefile (used for "make depend").
@@ -28,10 +28,10 @@ DEBUG = stabs
 CSTANDARD = -std=c99
 
 # Place -D or -U options here
-CDEFS = -DF_CPU=16000000 -DBAUD=9600
+CDEFS = -DF_CPU=16000000 -DBAUD=9600 -DPRINTF
 
 # Place -I options here
-CINCS = -I../
+CINCS = -I../../
 
 
 CDEBUG = -g$(DEBUG)
@@ -77,7 +77,7 @@ MATH_LIB = -lm
 EXTMEMOPTS =
 
 #LDMAP = $(LDFLAGS) -Wl,-Map=$(TARGET).map,--cref
-LDFLAGS = $(EXTMEMOPTS) $(LDMAP) $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
+LDFLAGS = $(EXTMEMOPTS) $(LDMAP) $(PRINTF_LIB_FLOAT) $(SCANF_LIB) $(MATH_LIB)
 
 
 # Programming support using avrdude. Settings and variables.
