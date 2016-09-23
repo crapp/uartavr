@@ -86,7 +86,7 @@
 /**
  * @brief Version minor
  */
-#define UARTAVR_VERSION_MINOR 2
+#define UARTAVR_VERSION_MINOR 3
 /**
  * @brief Version patch
  */
@@ -94,8 +94,18 @@
 
 /**
  * @brief Define the line ending you need. This one will work with minicom on linux
+ *
+ * @details
+ * This will automatically appended to all strings that you want to send using
+ * puts_UART()
  */
 #define CR "\n\r"
+
+/**
+ * @brief If set this sign well be send whenever puts_printf_UART() sees a newline
+ * character
+ */
+#define CR_PRINTF "\r"
 
 /**
  * @brief The buffer size for the RX and TX buffers
@@ -264,9 +274,34 @@ uint8_t get_UART(char *s);
 uint8_t gets_UART(char *s);
 
 #ifdef PRINTF
+
+/**
+ * @brief The FILE stream method for uartavr_stdout
+ *
+ * @param c The character to write into the circular buffer
+ * @param stream
+ *
+ * @return Always 0 currently
+ * @details
+ * init_UART() will bind uartavr_stdout FILE stream to stdout. This way everything
+ * that will be written to stdout (e.g. with printf) will effectively be written in
+ * the circular buffer of uartavr. You need to link your application against
+ * printf_ftl or printf_min to make this work.
+ * @sa
+ * printf_examples.c in examples subfolder
+ */
 int puts_printf_UART(char c, FILE *stream);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+
+/**
+ * @brief The file stream we will use for stdout
+ *
+ * @details
+ * init_UART() will bind this FILE stream to stdout. This way everything that
+ * will be written to stdout (e.g. with printf) will effectively be written in
+ * the circular buffer of uartavr.
+ */
 static FILE uartavr_stdout =
     FDEV_SETUP_STREAM(puts_printf_UART, NULL, _FDEV_SETUP_WRITE);
 #pragma GCC diagnostic pop

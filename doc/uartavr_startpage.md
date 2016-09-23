@@ -3,7 +3,7 @@
 uartavr is a simple interrupt driven UART library for Atmel AVRs. The library
 consists of a header and source file. The library is documented using [Doxygen](http://www.stack.nl/~dimitri/doxygen/index.html)
 
-The latest version of the API docs can be found at [github.io](https://crapp.github.io).
+The latest version of the API docs can be found at [github.io](https://crapp.github.io/uartavr).
 If you need a local version you can use the doxygen tool to create one using the
 doxygen config file in the `doc` subfolder.
 

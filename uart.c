@@ -241,10 +241,13 @@ uint8_t gets_UART(char *s)
     }
 }
 #ifdef PRINTF
-int puts_printf_UART(char c, FILE *stream) {
+int puts_printf_UART(char c, FILE *stream)
+{
     put_UART(c);
     if (c == '\n') {
-        put_UART('\r');
+#ifdef CR_PRINTF
+        put_UART(CR_PRINTF);
+#endif
     }
     return 0;
 }
