@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['readme',['README',['../md__home_saedelaere_Projekte_embedded_uartavr_README.html',1,'']]]
+  ['readme',['README',['../md__home_saedelaere__projekte_embedded_uartavr__r_e_a_d_m_e.html',1,'']]]
 ];

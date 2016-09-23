@@ -5,5 +5,6 @@ var searchData=
   ['cb_5fpop',['cb_pop',['../uart_8h.html#a6384725182051b19dc93898dd1f5659d',1,'uart.c']]],
   ['cbuffer',['CBuffer',['../struct_c_buffer.html',1,'']]],
   ['cp_5fpush',['cp_push',['../uart_8h.html#a52fa692f1b71f45188b6e2be77c77e41',1,'uart.h']]],
-  ['cr',['CR',['../uart_8h.html#a876ce77f3c672c7162658151e648389e',1,'uart.h']]]
+  ['cr',['CR',['../uart_8h.html#a876ce77f3c672c7162658151e648389e',1,'uart.h']]],
+  ['cr_5fprintf',['CR_PRINTF',['../uart_8h.html#a70d82fcddbdb248815026167737f7ac1',1,'uart.h']]]
 ];
