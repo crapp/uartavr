@@ -1,0 +1,1 @@
+(B) 2016-09-23 Make gets_UART into printf like function. This way we could pass an argument stating how many bytes (at maximum) we want to have from the buffer
