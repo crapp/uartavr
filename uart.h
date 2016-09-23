@@ -50,6 +50,9 @@
  */
 #include <inttypes.h>
 #include <stdlib.h>
+#ifdef PRINTF
+#include <stdio.h>
+#endif
 
 #include <avr/io.h>
 #include <util/atomic.h>
@@ -259,5 +262,14 @@ uint8_t get_UART(char *s);
  * buffer with DirBuff#items
  */
 uint8_t gets_UART(char *s);
+
+#ifdef PRINTF
+int puts_printf_UART(char c, FILE *stream);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+static FILE uartavr_stdout =
+    FDEV_SETUP_STREAM(puts_printf_UART, NULL, _FDEV_SETUP_WRITE);
+#pragma GCC diagnostic pop
+#endif
 
 #endif /* ifndef UART_H */

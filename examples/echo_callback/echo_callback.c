@@ -29,23 +29,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*H**********************************************************************
+* FILENAME :        echo_callback.c
+*
+* DESCRIPTION :
+*       Echo example for uartavr
+*
+* NOTES :
+*       You can use this example to echo back data that was send to the
+*       microcontroller.
+*       This example makes use of the idle sleep mode.
+*
+*       This example was written for the ATmega328P
+*
+* AUTHOR :    Christian Rapp
+*/
+
 #include <avr/io.h>
 #include <avr/sleep.h>
-
-#include <util/delay.h>
 
 #include <string.h>
 
 #include "uart.h"
 
-/*
- * You can use this example to echo back data that was send to the
- * microcontroller.
- * This example makes use of the idle sleep mode
+volatile uint8_t wakeup; /* wake up signal for the main loop */
+
+/**
+ * The callback function that will be called from USART_RX_vect
+ * I use it here to check the number of bytes currently in the buffer. If we have
+ * 5 bytes we signal the main loop to wake up. You need a byte array with size 6
+ * to fetch the data as gets_UART automatically appends a \0 terminating
+ * character
  */
-
-volatile uint8_t wakeup;
-
 void rx_cb(void)
 {
     if (cb.rx_buff.items == 5) {
@@ -55,6 +70,7 @@ void rx_cb(void)
 
 int main(void)
 {
+    /* set up uart with default values */
     struct UARTcfg cfg;
     memset(&cfg, 0, sizeof(struct UARTcfg));
 
@@ -64,14 +80,19 @@ int main(void)
 
     wakeup = 0;
 
+    /* we want to use sleep mode idle because uart can wake up the controller
+     * from this mode */
     set_sleep_mode(SLEEP_MODE_IDLE);
     sleep_enable();
 
     sei();
     while (1) {
+        /* sending data will wake the microntroller up but we don't want to
+         * continue yet so go to sleep once more */
         while (!wakeup) {
             sleep_mode();
         }
+        /* size 6 is important */
         char s[6];
         /* echo the string back */
         gets_UART(&s[0]);

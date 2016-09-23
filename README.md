@@ -7,6 +7,14 @@ Simple interrupt driven uart library for AVR microcontrollers. This library uses
 a circular buffer data structure to store data that was received or will be sent.
 This way all write or read calls are nonblocking.
 
+## Features
+
+* Easy to use
+* Interrupt driven
+* Callback Functions
+* Support for printf
+* Doxygen generated API Documentation
+
 ## Usage
 
 Add the header and source file to your project.

@@ -7,7 +7,7 @@
 
 MCU = atmega328p
 FORMAT = ihex
-TARGET = printf_example.c
+TARGET = printf_example
 SRC = $(TARGET).c
 ASRC = ../../uart.c
 OPT = s

@@ -155,6 +155,10 @@ void init_UART(const struct UARTcfg *cfg)
     UBRR0H = UBRRH_VALUE; /* set baud rate */
     UBRR0L = UBRRL_VALUE;
 
+#ifdef PRINTF
+    stdout = &uartavr_stdout;
+#endif
+
 #if USE_2X
     /* U2X-Modus is necessary */
     UCSR0A |= _BV(U2X0);
@@ -236,6 +240,15 @@ uint8_t gets_UART(char *s)
         return 1;
     }
 }
+#ifdef PRINTF
+int puts_printf_UART(char c, FILE *stream) {
+    put_UART(c);
+    if (c == '\n') {
+        put_UART('\r');
+    }
+    return 0;
+}
+#endif /* PRINTF */
 
 ISR(USART_RX_vect)
 {
