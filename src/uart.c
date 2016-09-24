@@ -240,14 +240,18 @@ uint8_t gets_UART(char *s)
         return 1;
     }
 }
+
 #ifdef PRINTF
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 int puts_printf_UART(char c, FILE *stream)
 {
+#pragma GCC diagnostic pop
     put_UART(c);
     if (c == '\n') {
 #ifdef CR_PRINTF
-        put_UART(CR_PRINTF);
-#endif
+        put_UART(*CR_PRINTF);
+#endif /* CR_PRINTF */
     }
     return 0;
 }

@@ -9,7 +9,7 @@ MCU = atmega328p
 FORMAT = ihex
 TARGET = printf_example
 SRC = $(TARGET).c
-ASRC = ../../uart.c
+ASRC = ../../src/uart.c
 OPT = s
 
 # Name of this Makefile (used for "make depend").
@@ -31,7 +31,7 @@ CSTANDARD = -std=c99
 CDEFS = -DF_CPU=16000000 -DBAUD=9600 -DPRINTF
 
 # Place -I options here
-CINCS = -I../../
+CINCS = -I../../src
 
 
 CDEBUG = -g$(DEBUG)
