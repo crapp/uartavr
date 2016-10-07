@@ -14,7 +14,7 @@ To use the library simply add the source code files to your project.
 The API documentation of the file uart.h is the place where you should have a look
 if you want to learn how to use this library.
 
-There is also a subfolder called `tests` where you can find different examples.
+There is also a subfolder called `examples` where you can find different examples.
 
 ## Contact
 
@@ -41,7 +41,7 @@ bug reports or feature requests
 > names of its contributors may be used to endorse or promote products
 > derived from this software without specific prior written permission.
 >
-> THIS SOFTWARE IS PROVIDED BY ''AS IS'' AND ANY  EXPRESS OR IMPLIED
+> THIS SOFTWARE IS PROVIDED ''AS IS'' AND ANY  EXPRESS OR IMPLIED
 > WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 > WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 > DISCLAIMED. IN NO EVENT SHALL yourname BE LIABLE FOR ANY
